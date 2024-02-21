@@ -1,34 +1,37 @@
+let listOfTopics = [
+  {
+    id: 1,
+    title: 'Introduction to Programming',
+    slug: 'Introduction-to-Programming',
+    description: 'Discussing the basics of programming languages and concepts.',
+    date_created: '2024-02-16T12:15:15',
+  },
+  {
+    id: 2,
+    title: 'Web Development Frameworks',
+    slug: 'Web-Development-Frameworks',
+    description:
+      'Exploring popular web development frameworks like React, Angular, and Vue.',
+    date_created: '2024-01-16T12:15:15',
+  },
+  {
+    id: 3,
+    title: 'Machine Learning Algorithms',
+    slug: 'Machine-Learning-Algorithms',
+    description:
+      'Deep dive into various machine learning algorithms and their applications.',
+    date_created: '2023-02-05T12:15:15',
+  },
+];
+
 exports.list = (req, res, next) => {
-  res.status(200).json([
-    {
-      id: 1,
-      title: 'Introduction to Programming',
-      slug: 'Introduction-to-Programming',
-      description:
-        'Discussing the basics of programming languages and concepts.',
-      date_created: '2024-02-16T12:15:15',
-    },
-    {
-      id: 2,
-      title: 'Web Development Frameworks',
-      slug: 'Web-Development-Frameworks',
-      description:
-        'Exploring popular web development frameworks like React, Angular, and Vue.',
-      date_created: '2024-01-16T12:15:15',
-    },
-    {
-      id: 3,
-      title: 'Machine Learning Algorithms',
-      slug: 'Machine-Learning-Algorithms',
-      description:
-        'Deep dive into various machine learning algorithms and their applications.',
-      date_created: '2023-02-05T12:15:15',
-    },
-  ]);
+  res.status(200).json(listOfTopics);
 };
 
 exports.create = (req, res, next) => {
-  const topic = req.body.topic;
+  console.log(req.body);
+  const topic = req.body;
+  listOfTopics.push(topic);
   res.status(200).json(topic);
 };
 

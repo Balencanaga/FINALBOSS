@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
   Container,
   Row,
@@ -12,69 +12,115 @@ import {
 import { Link } from 'react-router-dom';
 interface TopicProps {}
 
-const forumTopics = [
-  {
-    id: 1,
-    title: 'Introduction to Programming',
-    slug: 'Introduction-to-Programming',
-    description: 'Discussing the basics of programming languages and concepts.',
-    date_created: '2024-02-16T12:15:15',
-  },
-  {
-    id: 2,
-    title: 'Web Development Frameworks',
-    slug: 'Web-Development-Frameworks',
-    description:
-      'Exploring popular web development frameworks like React, Angular, and Vue.',
-    date_created: '2024-01-16T12:15:15',
-  },
-  {
-    id: 3,
-    title: 'Machine Learning Algorithms',
-    slug: 'Machine-Learning-Algorithms',
-    description:
-      'Deep dive into various machine learning algorithms and their applications.',
-    date_created: '2023-02-05T12:15:15',
-  },
-];
+const API_URL = 'http://localhost:3001';
 
-const renderedTopics = forumTopics.map((topic) => (
-  <Link style={{ textDecoration: 'none' }} to={'/forum/' + topic.slug}>
-    <Card className='mb-2'>
-      <Card.Body>
-        <Card.Title>{topic.title}</Card.Title>
-        <Card.Text>
-          {topic.description}
-          <div className='mt-3'>
-            Posts <Badge bg='secondary'>5</Badge>
+interface ITopic {
+  title: string;
+  description: string;
+  slug: string;
+}
+
+const TopicsPage: FC<TopicProps> = () => {
+  const [error, setError] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [topics, setTopics] = useState<ITopic[]>([]);
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${API_URL}/topics`);
+        const topics = (await response.json()) as ITopic[];
+        setTopics(topics);
+      } catch (e: any) {
+        setError(e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTopics();
+  }, []);
+
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newTopic: ITopic = {
+      title: title,
+      description: description,
+      slug: '',
+    };
+    console.log(newTopic);
+    fetch(`${API_URL}/topics`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTopic),
+    }).then(() => {
+      console.log('New topic added');
+    });
+  };
+
+  return (
+    <Container>
+      <div className='mb-5'>
+        {!isLoading && error && <div>ERROR!</div>}
+        {isLoading && <div>Loading...</div>}
+        {!isLoading && (
+          <>
+            {topics.map((topic) => (
+              <Link
+                style={{ textDecoration: 'none' }}
+                to={'/forum/' + topic.slug}
+              >
+                <Card className='mb-2'>
+                  <Card.Body>
+                    <Card.Title>{topic.title}</Card.Title>
+                    <Card.Text>
+                      {topic.description}
+                      <div className='mt-3'>
+                        Posts <Badge bg='secondary'>0</Badge>
+                      </div>
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </Link>
+            ))}
+          </>
+        )}
+      </div>
+      <div>
+        <Form onSubmit={handleSubmit}>
+          <div>
+            <Form.Group className='mb-3' controlId='topicForm.Topic'>
+              <Form.Label>Topic</Form.Label>
+              <Form.Control
+                type='text'
+                placeholder='Topic'
+                name='topic'
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className='mb-3' controlId='topicForm.Descripton'>
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as='textarea'
+                rows={4}
+                name='description'
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </Form.Group>
           </div>
-        </Card.Text>
-      </Card.Body>
-    </Card>
-  </Link>
-));
-
-const TopicsPage: FC<TopicProps> = () => (
-  <Container>
-    <div className='mb-5'>{renderedTopics}</div>
-    <div>
-      <Form>
-        <div>
-          <Form.Group className='mb-3' controlId='topicForm.Topic'>
-            <Form.Label>Topic</Form.Label>
-            <Form.Control type='text' placeholder='Topic' name='topic' />
-          </Form.Group>
-          <Form.Group className='mb-3' controlId='topicForm.Descripton'>
-            <Form.Label>Description</Form.Label>
-            <Form.Control as='textarea' rows={4} name='description' />
-          </Form.Group>
-        </div>
-        <div className='float-end'>
-          <Button type='submit'>Create new topic</Button>
-        </div>
-      </Form>
-    </div>
-  </Container>
-);
+          <div className='float-end'>
+            <Button type='submit'>Create new topic</Button>
+          </div>
+        </Form>
+      </div>
+    </Container>
+  );
+};
 
 export default TopicsPage;
